@@ -3,7 +3,7 @@ import streamlit as st
 import google.generativeai as genai
 from prompts import generated_que_wt1, generated_que_wt2
 from prompts import user_que_feedback_wt1, user_que_feedback_wt2, gen_feedback_wt1, gen_feedback_wt2
-from prompts import generate_cue_card_topic
+from prompts import generate_cue_card_topic,generate_answer, reading_question, speaking_feedback
 from audio_recorder_streamlit import audio_recorder
 from dotenv import load_dotenv
 
@@ -100,12 +100,6 @@ def transcribe_audio(audio_bytes):
     # Replace with actual transcription method
     return response.text
 
-def remove_extra_words(transcription):
-    prompt = "Remove filler words from the provided text"
-    response = model.generate_content([prompt, transcription])
-    # Replace with actual transcription
-    return response.text
-
 # Sidebar
 st.sidebar.title("IELTS Exam Prep")
 exam_section = st.sidebar.radio("Choose a section:", ("Reading", "Writing", "Speaking"))
@@ -138,7 +132,7 @@ else:
     option = None
 
 # Add the About Me section
-st.sidebar.markdown("---")  # Optional: Add a separator line
+st.sidebar.markdown("---") 
 st.sidebar.subheader("About Me")
 st.sidebar.markdown("Hi, I'm Deep Gandhi a Masters student at University of Windsor working towards building my career in the field of AI and Machine Learning. Connect with me on [LinkedIn](https://www.linkedin.com/in/deepgandhi22/).")
 
@@ -215,9 +209,9 @@ elif exam_section == "Speaking":
             st.markdown(st.session_state.cue_card_topic)
             st.markdown("**Instructions:**")
             st.markdown("1. Read the cue card topic carefully.")
-            st.markdown("2. You have 1 minute to prepare your response.")
+            st.markdown("2. Please try to sit in the area where there is less noise so that the audio would be more clear.")
             st.markdown("3. Speak for 1-2 minutes on the given topic.")
-            st.markdown("4. Click the 'Record' button when you're ready to start speaking.")
+            st.markdown("4. Click the 'Record' button when you're ready to start speaking and click again to complete the recording process.")
 
             # Record audio
             st.markdown("**Record your response:**")
@@ -229,7 +223,7 @@ elif exam_section == "Speaking":
 
             if st.button("Transcribe Audio"):
                 st.session_state.transcription = transcribe_audio(audio_bytes)
-                st.session_state.transcription = remove_extra_words(st.session_state.transcription)
+                # st.session_state.transcription = remove_extra_words(st.session_state.transcription)
                 st.session_state.provide_feedback = False  # Reset feedback flag
 
             if st.session_state.transcription:
@@ -240,7 +234,7 @@ elif exam_section == "Speaking":
                     st.session_state.provide_feedback = True
 
             if st.session_state.provide_feedback:
-                feedback_prompt = f"Provide feedback on the following IELTS Speaking response for the cue card topic: '{st.session_state.cue_card_topic}'. Response: {st.session_state.transcription}"
+                feedback_prompt = speaking_feedback(st.session_state.cue_card_topic,st.session_state.transcription)
                 feedback_response = model.generate_content(feedback_prompt)
                 st.session_state.feedback_text = feedback_response.text
                 st.session_state.provide_feedback = False  # Reset feedback flag
@@ -255,7 +249,7 @@ else:  # Reading section
     article = st.text_area("Enter your article here")
     if st.button("Submit"):
         st.session_state.article = article
-        prompt = f"Generate IELTS reading level of questions from the given article:\n\n{article}"
+        prompt = reading_question(st.session_state.article)
         response = model.generate_content(prompt)
         st.session_state.generated_questions = response.text
 
@@ -266,7 +260,7 @@ else:  # Reading section
             st.session_state.provide_answers = True
 
     if st.session_state.provide_answers:
-        prompt = f"Please provide answers to the following questions based on the article:\n\nQuestions:\n{st.session_state.generated_questions}\n\nArticle:\n{st.session_state.article}"
+        prompt = generate_answer(st.session_state.article, st.session_state.generated_questions)
         response = model.generate_content(prompt)
         answers = response.text
         st.markdown("**Answers:**")
