@@ -1,0 +1,5 @@
+streamlit
+google-generativeai
+dotenv
+audio-recorder-streamlit
+streamlit-mic-recorder
