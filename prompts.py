@@ -331,7 +331,7 @@ def reading_question(article):
     return f"""Generate IELTS Reading Section Question from the {article}. The question should include one word answer, two word answer, fill in the blanks, match the following, multiple choice questions, True false or not given etc. Ensure the level of question should be the same level as IELTS exam."""
 
 def generate_answer(articles, question):
-    return f"""Please provide answers to the following questions based on the article:\n\nQuestions:\n{question}\n\nArticle:\n{articles}"""
+    return f"""Please provide answers to the following questions based on the article:\n\nQuestions:\n{question}\n\nArticle:\n{articles}. The answers should be cleary differentiated from the text."""
 
 
 def speaking_feedback(question, user_answer):
