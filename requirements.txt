@@ -1,5 +1,5 @@
 streamlit
 google-generativeai
-dotenv
+python-dotenv
 audio-recorder-streamlit
 streamlit-mic-recorder
